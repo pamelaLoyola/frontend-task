@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:drag_and_drop_lists/drag_and_drop_lists.dart';
+import 'package:dropwdown/models/parent_model.dart';
 import 'package:dropwdown/data/register_data.dart';
 import 'package:dropwdown/utils/sizing_info.dart';
-import 'package:flutter/material.dart';
 
 class InfoTile extends StatefulWidget {
   InfoTile({Key? key}) : super(key: key);
@@ -10,10 +12,26 @@ class InfoTile extends StatefulWidget {
 }
 
 class _InfoTileState extends State<InfoTile> {
+  late List<DragAndDropList> _lists;
+  late List<DragAndDropItem> _items = [];
+  double _expandedTileHeigh = 200;
   bool _isExpanded = false;
 
   @override
+  void initState() {
+    _lists = List.generate(1, (index) {
+      return DragAndDropList(
+        header: Text("Lista de familiares $index"),
+        children: _items,
+      );
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    double _height = MediaQuery.of(context).size.height;
+
     return ExpansionTile(
       title: Text("Info of parents"),
       trailing: Icon(_isExpanded
@@ -21,10 +39,13 @@ class _InfoTileState extends State<InfoTile> {
           : Icons.keyboard_arrow_down_rounded),
       textColor: Theme.of(context).primaryColor,
       iconColor: Theme.of(context).primaryColor,
-      onExpansionChanged: (value) => setState(() => _isExpanded = value),
+      onExpansionChanged: (value) => setState(() {
+        _isExpanded = value;
+        _expandedTileHeigh = _height;
+      }),
       children: [
         tileHeaderContainer(),
-        tileBodyContainer(),
+        tileDraggableBody(),
       ],
     );
   }
@@ -33,6 +54,19 @@ class _InfoTileState extends State<InfoTile> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       child: isDesktop(context) ? desktopTileHeader() : mobileTileHeader(),
+    );
+  }
+
+  Widget tileDraggableBody() {
+    return Container(
+      height: _expandedTileHeigh - 230,
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      child: DragAndDropLists(
+        children: _lists,
+        onItemReorder: _onItemReorder,
+        onListReorder: _onListReorder,
+        // ),
+      ),
     );
   }
 
@@ -46,9 +80,7 @@ class _InfoTileState extends State<InfoTile> {
           return Card(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: isDesktop(context)
-                  ? desktopTileBody(index)
-                  : mobileTileBody(index),
+              child: isDesktop(context) ? desktopTileBody() : mobileTileBody(),
             ),
           );
         },
@@ -56,7 +88,8 @@ class _InfoTileState extends State<InfoTile> {
     );
   }
 
-  Widget desktopTileBody(index) {
+  //Needs an index
+  Widget desktopTileBody() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -66,9 +99,9 @@ class _InfoTileState extends State<InfoTile> {
         Text('name'),
         IconButton(
           onPressed: () {
-            setState(() {
-              parents.removeAt(index);
-            });
+            // setState(() {
+            //   parents.removeAt(index);
+            // });
           },
           icon: Icon(Icons.delete),
         )
@@ -76,7 +109,7 @@ class _InfoTileState extends State<InfoTile> {
     );
   }
 
-  Widget mobileTileBody(index) {
+  Widget mobileTileBody() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10),
       child: Column(
@@ -117,9 +150,9 @@ class _InfoTileState extends State<InfoTile> {
             children: [
               IconButton(
                 onPressed: () {
-                  setState(() {
-                    parents.removeAt(index);
-                  });
+                  // setState(() {
+                  //   parents.removeAt(index);
+                  // });
                 },
                 icon: Icon(
                   Icons.delete,
@@ -143,10 +176,9 @@ class _InfoTileState extends State<InfoTile> {
         Text('Name'),
         Text('Name'),
         IconButton(
-            onPressed: () {
-              setState(() => parents.add('widget'));
-            },
-            icon: Icon(Icons.add))
+          onPressed: () => addItem(),
+          icon: Icon(Icons.add),
+        )
       ],
     );
   }
@@ -157,11 +189,42 @@ class _InfoTileState extends State<InfoTile> {
       children: [
         Text('Add a new parent'),
         IconButton(
-            onPressed: () {
-              setState(() => parents.add('widget'));
-            },
-            icon: Icon(Icons.add))
+          onPressed: () => addItem(),
+          icon: Icon(Icons.add),
+        )
       ],
     );
+  }
+
+  void addItem() {
+    setState(() {
+      ParentModel newParent = ParentModel(name: 'Pamela', lastname: 'Loyola');
+
+      _items.add(buildParentItem(newParent));
+    });
+  }
+
+  DragAndDropItem buildParentItem(ParentModel parent) => DragAndDropItem(
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: isDesktop(context) ? desktopTileBody() : mobileTileBody(),
+          ),
+        ),
+      );
+
+  _onItemReorder(
+      int oldItemIndex, int oldListIndex, int newItemIndex, int newListIndex) {
+    setState(() {
+      var movedItem = _lists[oldListIndex].children.removeAt(oldItemIndex);
+      _lists[newListIndex].children.insert(newItemIndex, movedItem);
+    });
+  }
+
+  _onListReorder(int oldListIndex, int newListIndex) {
+    setState(() {
+      var movedList = _lists.removeAt(oldListIndex);
+      _lists.insert(newListIndex, movedList);
+    });
   }
 }
