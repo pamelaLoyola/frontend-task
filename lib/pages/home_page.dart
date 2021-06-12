@@ -1,7 +1,7 @@
-import 'package:dropwdown/data/register_data.dart';
-import 'package:dropwdown/widgets/components/info_tile/info_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:dropwdown/widgets/components/image_container.dart';
+
+import 'package:dropwdown/widgets/image_container.dart';
+import 'package:dropwdown/widgets/info_parents_tile.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -19,7 +19,10 @@ class _HomePageState extends State<HomePage> {
         ),
         body: SingleChildScrollView(
           child: Column(
-            children: [ImageContainer(), InfoTile()],
+            children: [
+              ImageContainer(),
+              InfoTile(),
+            ],
           ),
         ));
   }

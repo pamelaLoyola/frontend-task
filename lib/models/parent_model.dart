@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 
-class ParentModel {
-  final String name;
-  final String lastname;
+class ParentModel with ChangeNotifier {
+  String relationType;
+  String id;
+  String pedegree;
+  String senasa;
 
-  const ParentModel({
-    required this.name,
-    required this.lastname,
+  ParentModel({
+    this.relationType = "",
+    this.id = "",
+    this.pedegree = "",
+    this.senasa = "",
   });
-  // final TextFormField name;
-  // final TextFormField lastname;
-
-  // const ParentItem({
-  //   required this.name,
-  //   required this.lastname,
-  // });
 }
